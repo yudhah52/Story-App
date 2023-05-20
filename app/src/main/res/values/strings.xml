@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">Story Apps</string>
+    <string name="signup">Daftar</string>
+    <string name="login">Masuk</string>
+    <string name="title_welcome_page">Selamat datang!</string>
+    <string name="message_welcome_page">Ayo bagikan cerita Kamu di Story App!</string>
+    <string name="greeting">Halo %1$s,</string>
+    <string name="title_signup_page">SignUp</string>
+    <string name="message_signup_page">Lengkapi data dirimu untuk bisa membagikan ceritamu!</string>
+    <string name="name">Nama</string>
+    <string name="password">Kata Sandi</string>
+    <string name="email">Email</string>
+    <string name="message_login_page">Masukkan email dan password untuk membagikan ceritamu!</string>
+    <string name="message_main_page">Selamat membagikan kegiatanmu di Story App!</string>
+    <string name="title_login_page">SignIn</string>
+    <string name="logout">Keluar</string>
+    <string name="email_blank">Email tidak boleh kosong</string>
+    <string name="email_invalid">Alamat email tidak valid</string>
+    <string name="password_invalid">Kata sandi minimal harus terdiri dari 8 karakter</string>
+    <string name="register_invalid">Email atau Kata Sandi tidak valid</string>
+    <string name="gallery">Gallery</string>
+    <string name="logout_error">Gagal Keluar</string>
+    <string name="language">Bahasa</string>
+    <string name="detail_story">Detail Cerita</string>
+    <string name="upload">Upload</string>
+    <string name="empty_text">Data Kosong</string>
+    <string name="story_description">Deskripsi Cerita</string>
+    <string name="camera">Camera</string>
+    <string name="addStory">Tambahkan Cerita</string>
+    <string name="allow_permission">Mohon izinkan akses kamera pada pengaturan</string>
+    <string name="story_invalid">Cerita atau deskripsi tidak boleh kosong</string>
+    <string name="appwidget_text">Cerita</string>
+</resources>
