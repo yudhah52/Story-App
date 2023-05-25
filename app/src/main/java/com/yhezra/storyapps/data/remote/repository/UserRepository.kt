@@ -5,7 +5,8 @@ import com.yhezra.storyapps.data.local.preference.UserPreference
 import com.yhezra.storyapps.data.remote.retrofit.ApiService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import com.yhezra.storyapps.data.Result
+import com.yhezra.storyapps.data.remote.utils.story.Result
+import com.yhezra.storyapps.data.remote.utils.EspressoIdlingResource
 import kotlinx.coroutines.flow.emitAll
 
 class UserRepository private constructor(
@@ -17,25 +18,31 @@ class UserRepository private constructor(
 
     fun login(email: String, password: String): Flow<Result<String>> = flow {
         emit(Result.Loading)
+        EspressoIdlingResource.increment()
         try {
             val response = apiService.login(email, password)
             val token = response.loginResult.token
             userPreference.saveToken(token)
             emit(Result.Success(response.message))
+            EspressoIdlingResource.decrement()
         } catch (e: Exception) {
             Log.d("UserRepository", "login: ${e.message.toString()}")
             emit(Result.Error(e.message.toString()))
+            EspressoIdlingResource.decrement()
         }
     }
 
     fun register(name: String, email: String, password: String): Flow<Result<String>> = flow {
         emit(Result.Loading)
+        EspressoIdlingResource.increment()
         try {
             val response = apiService.register(name, email, password)
             emit(Result.Success(response.message))
+            EspressoIdlingResource.decrement()
         } catch (e: Exception) {
             Log.d("UserRepository", "register: ${e.message.toString()}")
             emit(Result.Error(e.message.toString()))
+            EspressoIdlingResource.decrement()
         }
     }
 

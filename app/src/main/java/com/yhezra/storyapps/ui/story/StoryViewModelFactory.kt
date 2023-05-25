@@ -10,6 +10,7 @@ import com.yhezra.storyapps.di.Injection
 
 class StoryViewModelFactory(private val storyRepository: StoryRepository) :
     ViewModelProvider.NewInstanceFactory() {
+
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(StoryViewModel::class.java)) {

@@ -30,4 +30,12 @@
     <string name="allow_permission">Mohon izinkan akses kamera pada pengaturan</string>
     <string name="story_invalid">Cerita atau deskripsi tidak boleh kosong</string>
     <string name="appwidget_text">Cerita</string>
+    <string name="location_permission">Sertakan lokasi saat ini</string>
+    <string name="retry">Ulang</string>
+    <string name="story_location">Lokasi Cerita</string>
+    <string name="upload_current_location">Unggah Lokasi Saat Ini?</string>
+    <string name="location_error">Kesalahan Lokasi</string>
+    <string name="location_permission_error">Kesalahan Izin Lokasi</string>
+    <string name="login_success">Login Berhasil</string>
+    <string name="login_wrong">Login Gagal</string>
 </resources>

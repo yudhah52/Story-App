@@ -15,8 +15,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.yhezra.storyapps.R
-import com.yhezra.storyapps.data.Result
 import com.yhezra.storyapps.databinding.ActivitySignupBinding
+import com.yhezra.storyapps.data.remote.utils.story.Result
 import com.yhezra.storyapps.ui.auth.AuthViewModel
 import com.yhezra.storyapps.ui.auth.AuthViewModelFactory
 

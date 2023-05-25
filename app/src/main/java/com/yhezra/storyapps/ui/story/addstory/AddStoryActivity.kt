@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
+import android.location.Location
 import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -20,7 +21,10 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.yhezra.storyapps.R
+import com.yhezra.storyapps.data.remote.utils.story.Result
 import com.yhezra.storyapps.data.remote.utils.rotateFile
 import com.yhezra.storyapps.data.remote.utils.uriToFile
 import com.yhezra.storyapps.databinding.ActivityAddStoryBinding
@@ -29,15 +33,18 @@ import com.yhezra.storyapps.ui.story.StoryViewModel
 import com.yhezra.storyapps.ui.story.StoryViewModelFactory
 import com.yhezra.storyapps.ui.story.addstory.camera.CameraActivity
 import java.io.File
-import com.yhezra.storyapps.data.Result
 
 class AddStoryActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityAddStoryBinding
-
     private var getFile: File? = null
 
+    private lateinit var binding: ActivityAddStoryBinding
+
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "auth")
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    private var location: Location? = null
 
     private val addStoryViewModel: StoryViewModel by viewModels {
         StoryViewModelFactory.getInstance(application, dataStore)
@@ -74,6 +81,126 @@ class AddStoryActivity : AppCompatActivity() {
             }
         }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_CODE_PERMISSIONS) {
+            if (!allPermissionsGranted()) {
+                Toast.makeText(this, getString(R.string.allow_permission), Toast.LENGTH_SHORT)
+                    .show()
+            } else {
+                startCameraX()
+            }
+        }
+    }
+
+    private fun allPermissionsGranted(vararg permissions: String): Boolean {
+        return permissions.all {
+            ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    private fun startCameraX() {
+        val intent = Intent(this, CameraActivity::class.java)
+        launcherIntentCameraX.launch(intent)
+    }
+
+    private fun startGallery() {
+        val intent = Intent()
+        intent.action = Intent.ACTION_GET_CONTENT
+        intent.type = "image/*"
+        val chooser = Intent.createChooser(intent, "Choose a Picture")
+        launcherIntentGallery.launch(chooser)
+    }
+
+    private fun uploadImage() {
+        val description = binding.storyDescriptionEditText.text.toString()
+        if (description.isNotBlank() && getFile != null) {
+            val file = getFile as File
+
+            addStoryViewModel.addStory(description, file, location?.latitude, location?.longitude)
+                .observe(this) {
+                    when (it) {
+                        is Result.Loading -> {
+                            binding.progressBar.visibility = View.VISIBLE
+                        }
+
+                        is Result.Success -> {
+                            binding.progressBar.visibility = View.GONE
+                            val intent = Intent()
+                            setResult(MainActivity.RESULT_OK, intent)
+                            finish()
+                        }
+
+                        is Result.Error -> {
+                            binding.progressBar.visibility = View.GONE
+                            Toast.makeText(this@AddStoryActivity, it.error, Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    }
+                }
+        } else {
+            Toast.makeText(
+                this@AddStoryActivity,
+                getString(R.string.story_invalid),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    private val locationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            when {
+                permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false -> {
+                    getMyLastLocation()
+                }
+
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false -> {
+                    getMyLastLocation()
+                }
+
+                else -> {
+                    Toast.makeText(this, getString(R.string.allow_permission), Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+        }
+
+
+    private fun getMyLastLocation() {
+        val fineLocationGranted = allPermissionsGranted(Manifest.permission.ACCESS_FINE_LOCATION)
+        val coarseLocationGranted =
+            allPermissionsGranted(Manifest.permission.ACCESS_COARSE_LOCATION)
+
+        if (fineLocationGranted && coarseLocationGranted) {
+            try {
+                fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                    location?.let {
+                        this.location = it
+                    } ?: run {
+                        showToast(getString(R.string.location_error))
+                    }
+                }
+            } catch (e: SecurityException) {
+                showToast(getString(R.string.location_permission_error))
+            }
+        } else {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
+    private fun showToast(message: String) {
+        Toast.makeText(this@AddStoryActivity, message, Toast.LENGTH_SHORT).show()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddStoryBinding.inflate(layoutInflater)
@@ -81,6 +208,8 @@ class AddStoryActivity : AppCompatActivity() {
 
         setupAction()
         setToolbar()
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     }
 
     private fun setupAction() {
@@ -95,6 +224,13 @@ class AddStoryActivity : AppCompatActivity() {
             }
             btnGallery.setOnClickListener { startGallery() }
             btnAdd.setOnClickListener { uploadImage() }
+            cbUpdateCurrentLocation.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    getMyLastLocation()
+                } else {
+                    location = null
+                }
+            }
         }
     }
 
@@ -129,72 +265,6 @@ class AddStoryActivity : AppCompatActivity() {
                     startActivity(intent)
                 }
             }
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            if (!allPermissionsGranted()) {
-                Toast.makeText(this, getString(R.string.allow_permission), Toast.LENGTH_SHORT)
-                    .show()
-            } else {
-                startCameraX()
-            }
-        }
-    }
-
-    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(baseContext, it) == PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun startCameraX() {
-        val intent = Intent(this, CameraActivity::class.java)
-        launcherIntentCameraX.launch(intent)
-    }
-
-    private fun startGallery() {
-        val intent = Intent()
-        intent.action = Intent.ACTION_GET_CONTENT
-        intent.type = "image/*"
-        val chooser = Intent.createChooser(intent, "Choose a Picture")
-        launcherIntentGallery.launch(chooser)
-    }
-
-    private fun uploadImage() {
-        val description = binding.storyDescriptionEditText.text.toString()
-        if (description.isNotBlank() && getFile != null) {
-            val file = getFile as File
-
-            addStoryViewModel.addStory(description, file).observe(this) {
-                when (it) {
-                    is Result.Loading -> {
-                        binding.progressBar.visibility = View.VISIBLE
-                    }
-
-                    is Result.Success -> {
-                        binding.progressBar.visibility = View.GONE
-                        val intent = Intent()
-                        setResult(MainActivity.RESULT_OK, intent)
-                        finish()
-                    }
-
-                    is Result.Error -> {
-                        binding.progressBar.visibility = View.GONE
-                        Toast.makeText(this@AddStoryActivity, it.error, Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-        } else {
-            Toast.makeText(
-                this@AddStoryActivity,
-                getString(R.string.story_invalid),
-                Toast.LENGTH_SHORT
-            ).show()
         }
     }
 

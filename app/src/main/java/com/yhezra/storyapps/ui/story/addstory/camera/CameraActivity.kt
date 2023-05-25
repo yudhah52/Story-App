@@ -13,6 +13,7 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import com.yhezra.storyapps.data.remote.utils.EspressoIdlingResource
 import com.yhezra.storyapps.data.remote.utils.createFile
 import com.yhezra.storyapps.databinding.ActivityCameraBinding
 import com.yhezra.storyapps.ui.story.addstory.AddStoryActivity
@@ -41,11 +42,12 @@ class CameraActivity : AppCompatActivity() {
 
     public override fun onResume() {
         super.onResume()
-        startCamera()
         hideSystemUI()
+        startCamera()
     }
 
     private fun takePhoto() {
+        EspressoIdlingResource.increment()
         val imageCapture = imageCapture ?: return
         val photoFile = createFile(application)
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
@@ -59,6 +61,7 @@ class CameraActivity : AppCompatActivity() {
                         "Gagal mengambil gambar.",
                         Toast.LENGTH_SHORT
                     ).show()
+                    EspressoIdlingResource.decrement()
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
@@ -70,6 +73,7 @@ class CameraActivity : AppCompatActivity() {
                     )
                     setResult(AddStoryActivity.CAMERA_X_RESULT, intent)
                     finish()
+                    EspressoIdlingResource.decrement()
                 }
             }
         )
