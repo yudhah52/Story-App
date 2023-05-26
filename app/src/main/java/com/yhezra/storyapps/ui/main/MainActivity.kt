@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
@@ -45,6 +46,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
         val storyAdapter = ListStoryAdapter { story, optionsCompat ->
             val intent = Intent(this@MainActivity, DetailActivity::class.java)
             intent.putExtra(DetailActivity.EXTRA_ID, story.id)
@@ -71,6 +74,8 @@ class MainActivity : AppCompatActivity() {
                 finish()
             }
         }
+
+        binding.toolbar.actionMaps.visibility = View.VISIBLE
 
         binding.rvUserStory.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)

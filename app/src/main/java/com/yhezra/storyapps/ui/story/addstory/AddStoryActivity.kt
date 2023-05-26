@@ -88,11 +88,13 @@ class AddStoryActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            if (!allPermissionsGranted()) {
+            val isAllPermissionsGranted =
+                grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+            if (isAllPermissionsGranted) {
+                startCameraX()
+            } else {
                 Toast.makeText(this, getString(R.string.allow_permission), Toast.LENGTH_SHORT)
                     .show()
-            } else {
-                startCameraX()
             }
         }
     }
@@ -206,21 +208,20 @@ class AddStoryActivity : AppCompatActivity() {
         binding = ActivityAddStoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setupAction()
-        setToolbar()
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        setAction()
+        confToolbar()
     }
 
-    private fun setupAction() {
+    private fun setAction() {
         binding.apply {
             btnCamera.setOnClickListener {
-                if (!allPermissionsGranted()) ActivityCompat.requestPermissions(
-                    this@AddStoryActivity,
-                    REQUIRED_PERMISSIONS,
-                    REQUEST_CODE_PERMISSIONS
-                )
-                else startCameraX()
+                if (!allPermissionsGranted(*REQUIRED_PERMISSIONS)) {
+                    requestPermissionsIfRequired(REQUIRED_PERMISSIONS)
+                } else {
+                    startCameraX()
+                }
             }
             btnGallery.setOnClickListener { startGallery() }
             btnAdd.setOnClickListener { uploadImage() }
@@ -234,7 +235,21 @@ class AddStoryActivity : AppCompatActivity() {
         }
     }
 
-    private fun setToolbar() {
+    private fun requestPermissionsIfRequired(permissions: Array<String>) {
+        val ungrantedPermissions = permissions.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (ungrantedPermissions.isNotEmpty()) {
+            ActivityCompat.requestPermissions(
+                this,
+                ungrantedPermissions.toTypedArray(),
+                REQUEST_CODE_PERMISSIONS
+            )
+        }
+    }
+
+    private fun confToolbar() {
         binding.apply {
             with(toolbar) {
                 toolbarLogo.setImageDrawable(
@@ -270,7 +285,9 @@ class AddStoryActivity : AppCompatActivity() {
 
     companion object {
         const val CAMERA_X_RESULT = 200
-        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
+        private val REQUIRED_PERMISSIONS = arrayOf(
+            Manifest.permission.CAMERA
+        )
         private const val REQUEST_CODE_PERMISSIONS = 10
     }
 }
