@@ -9,7 +9,6 @@ import androidx.core.os.bundleOf
 import com.yhezra.storyapps.R
 import com.yhezra.storyapps.data.local.entity.StoryEntity
 import com.yhezra.storyapps.data.local.room.StoryDatabase
-import com.yhezra.storyapps.data.remote.response.StoryResponse
 import com.yhezra.storyapps.data.remote.utils.getBitMap
 
 internal class StackRemoteViewsFactory(private val mContext: Context) :

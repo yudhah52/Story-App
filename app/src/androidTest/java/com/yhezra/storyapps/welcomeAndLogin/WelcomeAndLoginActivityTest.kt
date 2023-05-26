@@ -32,13 +32,10 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class WelcomeAndLoginActivityTest {
     private val sampleName = "Siuuu"
-
     private val email = "siuuu@gmail.com"
     private val password = "siuuu123"
-
     private val wrongEmail = "yuddddddd@gmail.com"
     private val wrongPassword = "yuddddddddd"
-
     private val invalidEmail = "yudddddd"
     private val invalidPassword = "yud"
 
