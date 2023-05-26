@@ -31,16 +31,16 @@ import org.junit.runner.RunWith
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 class WelcomeAndLoginActivityTest {
-    private val sampleName = "ridwan"
+    private val sampleName = "Siuuu"
 
-    private val email = "ridwan.rr@gmail.com"
-    private val password = "123123123"
+    private val email = "siuuu@gmail.com"
+    private val password = "siuuu123"
 
-    private val wrongEmail = "wrongemail@gmail.com"
-    private val wrongPassword = "wrongpassword"
+    private val wrongEmail = "yuddddddd@gmail.com"
+    private val wrongPassword = "yuddddddddd"
 
-    private val invalidEmail = "invalid_email"
-    private val invalidPassword = "invalid_password"
+    private val invalidEmail = "yudddddd"
+    private val invalidPassword = "yud"
 
     @Before
     fun setUp() = runTest {
@@ -66,8 +66,8 @@ class WelcomeAndLoginActivityTest {
         onView(withId(R.id.loginButton)).perform(click())
         // AlertDialog click
         val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-        device.wait(Until.hasObject(By.text("Lanjut")), 3000)
-        val button = device.findObject(By.text("Lanjut"))
+        device.wait(Until.hasObject(By.text("Selanjutnya")), 3000)
+        val button = device.findObject(By.text("Selanjutnya"))
         button.click()
         Thread.sleep(2000)
         onView(withId(R.id.rv_user_story)).check(matches(isDisplayed()))
